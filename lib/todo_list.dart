@@ -36,7 +36,7 @@ class _TodoListState extends State<TodoList> {
             ),),
             child: ListView.builder(
               itemCount: items.length,
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               itemBuilder: (context, index) {
                 final item = items[index] as Map;
                 final id = item['_id'] as String;
@@ -57,12 +57,12 @@ class _TodoListState extends State<TodoList> {
                         itemBuilder: (context) {
                           return [
                             const PopupMenuItem(
-                              child: Text('Edit'),
                               value: 'edit',
+                              child: Text('Edit'),
                             ),
                             const PopupMenuItem(
-                              child: Text('Delete'),
                               value: 'delete',
+                              child: Text('Delete'),
                             )
                           ];
                         },
