@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todo/todo_list.dart';
 
 void main(List<String> args) {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: TodoList()
+      home: const TodoList()
     );
   }
 }

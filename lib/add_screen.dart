@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AddScreen extends StatefulWidget {
-  const AddScreen({super.key});
+  final Map? todo;
+  const AddScreen({super.key, this.todo});
 
   @override
   State<AddScreen> createState() => _AddScreenState();
@@ -13,11 +14,28 @@ class AddScreen extends StatefulWidget {
 class _AddScreenState extends State<AddScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  bool isEdit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final todo = widget.todo;
+    if (todo != null) {
+      isEdit = true;
+      final title = todo['title'];
+      final description = todo['description'];
+      titleController.text = title;
+      descriptionController.text = description;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Todo'),
+        title: Text(
+          isEdit ? 'Edit Todo' : 'Add Todo',
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -43,12 +61,48 @@ class _AddScreenState extends State<AddScreen> {
           ),
           ElevatedButton(
               onPressed: () {
-                submitData();
+                isEdit ? updateData() : submitData();
               },
-              child: Text('Submit'))
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Text(
+                  isEdit ? 'Update' : 'Submit',
+                ),
+              ))
         ],
       ),
     );
+  }
+
+  Future<void> updateData() async {
+    final todo = widget.todo;
+    if (todo == null) {
+      print('You can not call updated without todo data');
+      return;
+    }
+    final id = todo['_id'];
+    final title = titleController.text;
+    final description = descriptionController.text;
+    final body = {
+      "title": title,
+      "description": description,
+      "is_completed": false,
+    };
+    
+
+    final url = 'https://api.nstack.in/v1/todos/$id';
+    final uri = Uri.parse(url);
+    final response = await http.put(uri,
+        body: jsonEncode(body), 
+        headers: {'Content-Type': 'application/json'
+        });
+
+      if (response.statusCode == 200) {
+      
+      showSuccessMsg('Updation Success');
+    } else {
+      showErrorMsg('Updation Failed');
+    }
   }
 
   Future<void> submitData() async {
@@ -59,12 +113,15 @@ class _AddScreenState extends State<AddScreen> {
       "description": description,
       "is_completed": false,
     };
-    // ignore: prefer_const_declarations
+    
     final url = 'https://api.nstack.in/v1/todos';
     final uri = Uri.parse(url);
     final response = await http.post(uri,
-        body: jsonEncode(body), headers: {'Content-Type': 'application/json'});
+        body: jsonEncode(body), 
+        headers: {'Content-Type': 'application/json'});
     if (response.statusCode == 201) {
+      titleController.text = '';
+      descriptionController.text = '';
       print('creation Success');
       showSuccessMsg('Creation Success');
     } else {
@@ -78,8 +135,12 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   void showErrorMsg(String message) {
-    final snackBar = SnackBar(content: Text(message,style: TextStyle(color: Colors.white),),
-    backgroundColor: Colors.red,
+    final snackBar = SnackBar(
+      content: Text(
+        message,
+        style: const TextStyle(color: Colors.white),
+      ),
+      backgroundColor: Colors.red,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
